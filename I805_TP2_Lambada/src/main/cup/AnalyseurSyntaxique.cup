@@ -2,6 +2,7 @@
 package fr.usmb.m1isc.compilation.tp;
 import java_cup.runtime.Symbol;
 import java.util.HashMap;
+import fr.usmb.m1isc.compilation.tp.BinaryNode.TerminalType;
 
 /* inclusion du code */
 
@@ -36,9 +37,8 @@ parser code {:
 :};
 
 /* symboles terminaux */
-terminal PLUS, MOINS, MOINS_UNAIRE, MUL, DIV, MOD, NOT, OR, AND, PAR_G, PAR_D, SEMI, POINT, LET, INPUT, OUTPUT, IF, THEN, ELSE, WHILE, DO, EGAL, GT, GTE, NIL, ERROR; 
-terminal Integer ENTIER;
-terminal String IDENT;
+terminal PLUS, MOINS, MOINS_UNAIRE, MUL, DIV, MOD, NOT, OR, AND, PAR_G, PAR_D, SEMI, POINT, LET, INPUT, OUTPUT, IF, THEN, ELSE, WHILE, DO, EGAL, GT, GTE, NIL, ERROR;
+terminal String IDENT, ENTIER;
 /* non terminaux */
 non terminal BinaryNode program, sequence, expression, expr;
 
@@ -59,36 +59,36 @@ program ::=
     ;
 
 // une sequence est une suite d'instructions separes par des point virgules 
-sequence ::= expression:e1 SEMI sequence:e2 {:RESULT = new BinaryNode<String>(";",  e1,  e2); :}
+sequence ::= expression:e1 SEMI sequence:e2 {:RESULT = new BinaryNode(";",  e1,  e2); :}
             | expression:e   {:RESULT = e; :}
             |
             ;
 
 // une expession est soit une affectation ,une              
 expression ::= expr:e {: RESULT = e; :}
-             | LET IDENT:nom EGAL expr:e {:RESULT = new BinaryNode<String>("LET",new BinaryNode((String) nom),  e); :}
-             | WHILE expr:cond DO expression:e {:RESULT = new BinaryNode<String>("WHILE",  cond,  e); :}
-             | IF expr:cond THEN expression:a1 ELSE expression:a2 {:RESULT = new BinaryNode<String>("IF", cond, new BinaryNode<String>("MANESE", a1,  a2)); :}
+             | LET IDENT:nom EGAL expr:e {:RESULT = new BinaryNode("LET",new BinaryNode((String) nom, TerminalType.VARIABLE),  e); :}
+             | WHILE expr:cond DO expression:e {:RESULT = new BinaryNode("WHILE",  cond,  e); :}
+             | IF expr:cond THEN expression:a1 ELSE expression:a2 {:RESULT = new BinaryNode("IF", cond, new BinaryNode("MANESE", a1,  a2)); :}
              | error // reprise d'erreurs
              ;
 
 // expression arithmetiques et logiques 
-expr ::= NOT:op expr:e {:RESULT = new BinaryNode<String>("!",  e); :}
-       | expr:e1 AND expr:e2 {:RESULT = new BinaryNode<String>("&&",  e1,  e2); :}
-       | expr:e1 OR expr:e2 {:RESULT = new BinaryNode<String>("||",  e1,  e2); :}
-       | expr:e1 EGAL expr:e2 {:RESULT = new BinaryNode<String>("==",  e1,  e2); :}
-       | expr:e1 GT expr:e2 {:RESULT = new BinaryNode<String>(">",  e1,  e2); :}
-       | expr:e1 GTE expr:e2 {:RESULT = new BinaryNode<String>(">=",  e1,  e2); :}
-       | expr:e1 PLUS expr:e2 {:RESULT = new BinaryNode<String>("+",  e1,  e2); :}
-       | expr:e1 MOINS expr:e2 {:RESULT = new BinaryNode<String>("-",  e1,  e2); :}
-       | expr:e1 MUL expr:e2 {:RESULT = new BinaryNode<String>("*",  e1,  e2); :}
-       | expr:e1 DIV expr:e2 {:RESULT = new BinaryNode<String>("/",  e1,  e2); :}
-       | expr:e1 MOD expr:e2 {:RESULT = new BinaryNode<String>("%",  e1,  e2); :}
-       | MOINS expr:e {:RESULT = new BinaryNode<String>("-",  e); :} %prec MOINS_UNAIRE
-       | OUTPUT expr:e {:RESULT = new BinaryNode<String>("PAPIER",  e); :}
-       | INPUT {:RESULT = new BinaryNode<String>("INPUT"); :}
-       | NIL {:RESULT = new BinaryNode<String>("PESPI"); :}
-       | ENTIER:n {:RESULT = new BinaryNode<Integer>((Integer) n); :}
-       | IDENT:id {:RESULT = new BinaryNode<String>((String) id); :}
-       | PAR_G sequence:e PAR_D {:RESULT = new BinaryNode<String>("()",  e); :}
+expr ::= NOT:op expr:e {:RESULT = new BinaryNode("!",  e); :}
+       | expr:e1 AND expr:e2 {:RESULT = new BinaryNode("&&",  e1,  e2); :}
+       | expr:e1 OR expr:e2 {:RESULT = new BinaryNode("||",  e1,  e2); :}
+       | expr:e1 EGAL expr:e2 {:RESULT = new BinaryNode("==",  e1,  e2); :}
+       | expr:e1 GT expr:e2 {:RESULT = new BinaryNode(">",  e1,  e2); :}
+       | expr:e1 GTE expr:e2 {:RESULT = new BinaryNode(">=",  e1,  e2); :}
+       | expr:e1 PLUS expr:e2 {:RESULT = new BinaryNode("+",  e1,  e2); :}
+       | expr:e1 MOINS expr:e2 {:RESULT = new BinaryNode("-",  e1,  e2); :}
+       | expr:e1 MUL expr:e2 {:RESULT = new BinaryNode("*",  e1,  e2); :}
+       | expr:e1 DIV expr:e2 {:RESULT = new BinaryNode("/",  e1,  e2); :}
+       | expr:e1 MOD expr:e2 {:RESULT = new BinaryNode("%",  e1,  e2); :}
+       | MOINS expr:e {:RESULT = new BinaryNode("-",  e); :} %prec MOINS_UNAIRE
+       | OUTPUT expr:e {:RESULT = new BinaryNode("OUTPUT",  e); :}
+       | INPUT {:RESULT = new BinaryNode("INPUT", TerminalType.INPUT); :}
+       | NIL {:RESULT = new BinaryNode("PESPI", TerminalType.NIL); :}
+       | ENTIER:n {:RESULT = new BinaryNode(n, TerminalType.ENTIER); :}
+       | IDENT:id {:RESULT = new BinaryNode(id, TerminalType.VARIABLE); :}
+       | PAR_G sequence:e PAR_D {:RESULT = new BinaryNode("()",  e); :}
        ;
