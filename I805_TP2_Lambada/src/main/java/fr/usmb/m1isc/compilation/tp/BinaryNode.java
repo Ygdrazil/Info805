@@ -101,45 +101,40 @@ public class BinaryNode {
                         this.rightChild.toAsm();
                     }
                     case "WHILE" -> {
-                        Main.ASM.state = "debut_while_1";
+                        Main.ASM.nbWhile += 1;
+                        Main.ASM.state = "debut_while_"+Main.ASM.nbWhile;
                         this.leftChild.toAsm();
-                        Main.ASM.state = "debut_while_1";
+                        Main.ASM.state = "debut_while_"+Main.ASM.nbWhile;
                         Main.ASM.put("mov eax,1");
-                        Main.ASM.put("jmp corps_while_1");
-                        Main.ASM.state = "corps_while_1";
-                        Main.ASM.put("jz sortie_while_1");
+                        Main.ASM.put("jmp corps_while_"+Main.ASM.nbWhile);
+                        Main.ASM.state = "corps_while_"+Main.ASM.nbWhile;
+                        Main.ASM.put("jz sortie_while_"+Main.ASM.nbWhile);
                         this.rightChild.toAsm();
-                        Main.ASM.put("jmp debut_while_1");
-                        Main.ASM.state = "sortie_while_1";
-                    }
-                    case "IF" -> {
-
-                    }
-                    case "ELSE" -> {
-
+                        Main.ASM.put("jmp debut_while_"+Main.ASM.nbWhile);
+                        Main.ASM.state = "sortie_while_"+Main.ASM.nbWhile;
                     }
                     case ">=" -> {
                         handleChildren();
                         Main.ASM.put("sub eax,ebx");
-                        Main.ASM.put("jge faux_gte_1");
+                        Main.ASM.put("jge faux_gte_"+Main.ASM.nbWhile);
                         setFaux("faux_gte_1");
                     }
                     case ">" -> {
                         handleChildren();
                         Main.ASM.put("sub eax,ebx");
-                        Main.ASM.put("jg faux_gt_1");
+                        Main.ASM.put("jg faux_gt_"+Main.ASM.nbWhile);
                         setFaux("faux_gt_1");
                     }
                     case "<=" -> {
                         handleChildren();
                         Main.ASM.put("sub eax,ebx");
-                        Main.ASM.put("jle faux_lte_1");
+                        Main.ASM.put("jle faux_lte_"+Main.ASM.nbWhile);
                         setFaux("faux_lte_1");
                     }
                     case "<" -> {
                         handleChildren();
                         Main.ASM.put("sub eax,ebx");
-                        Main.ASM.put("jl faux_lt_1");
+                        Main.ASM.put("jl faux_lt_"+Main.ASM.nbWhile);
                         setFaux("faux_lt_1");
                     }
                     case "mod" -> {

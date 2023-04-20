@@ -23,30 +23,14 @@ public class Main {
 		System.out.println(arbre.toString());
 		arbre.toAsm();
 		ASM.print();
-    /*	DATA SEGMENT
-			prixHt DD
-			prixTtc DD
-		DATA ENDS
-		CODE SEGMENT
-			mov eax, 200
-			mov prixHt, eax
-			mov eax, prixHt
-			push eax
-			mov eax, 119
-			pop ebx
-			mul eax, ebx
-			push eax
-			mov eax, 100
-			pop ebx
-			div ebx, eax
-			mov eax, ebx
-			mov prixTtc, eax
-	    CODE ENDS*/
 	}
 
 	public static class ASM {
+		public static int nbWhile = 0;
+
 		public static LinkedHashMap<String,ArrayList<String>> instructions = new LinkedHashMap<>();
 		public static ArrayList<String> data = new ArrayList<>();
+
 		public static String state = "code";
 
 		public static void print() {
