@@ -6,6 +6,8 @@ import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 public class Main {
 
@@ -43,8 +45,9 @@ public class Main {
 	}
 
 	public static class ASM {
-		public static ArrayList<String> code = new ArrayList<>();
+		public static LinkedHashMap<String,ArrayList<String>> instructions = new LinkedHashMap<>();
 		public static ArrayList<String> data = new ArrayList<>();
+		public static String state = "code";
 
 		public static void print() {
 			System.out.println("DATA SEGMENT");
@@ -52,10 +55,27 @@ public class Main {
 				System.out.println("	" + s);
 			}
 			System.out.println("DATA ENDS\nCODE SEGMENT");
-			for( String s : code) {
-				System.out.println("	" + s);
+			for( String key : instructions.keySet()){
+				if(!key.equals("code"))System.out.println(key+":");
+				for( String s : instructions.get(key)) {
+					System.out.println("	" + s);
+				}
 			}
 			System.out.println("CODE ENDS");
+		}
+
+		public static void put(String line) {
+			if(!instructions.containsKey(state)){
+				instructions.put(state, new ArrayList<>());
+			}
+			ArrayList<String> map = instructions.get(state);
+			map.add(line);
+		}
+
+		public static void addVariable(String var) {
+			if(!data.contains(var + " DD")){
+				data.add(var + " DD");
+			}
 		}
 	}
 

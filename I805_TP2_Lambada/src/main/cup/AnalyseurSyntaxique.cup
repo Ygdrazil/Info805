@@ -37,7 +37,7 @@ parser code {:
 :};
 
 /* symboles terminaux */
-terminal PLUS, MOINS, MOINS_UNAIRE, MUL, DIV, MOD, NOT, OR, AND, PAR_G, PAR_D, SEMI, POINT, LET, INPUT, OUTPUT, IF, THEN, ELSE, WHILE, DO, EGAL, GT, GTE, NIL, ERROR; 
+terminal PLUS, MOINS, MOINS_UNAIRE, MUL, DIV, MOD, NOT, OR, AND, PAR_G, PAR_D, SEMI, POINT, LET, INPUT, OUTPUT, IF, THEN, ELSE, WHILE, DO, EGAL, GT, GTE, LT, LTE, NIL, ERROR;
 terminal Integer ENTIER;
 terminal String IDENT;
 /* non terminaux */
@@ -48,7 +48,7 @@ precedence right OR;
 precedence right AND;
 precedence right NOT;
 precedence nonassoc EGAL;
-precedence nonassoc GT, GTE;
+precedence nonassoc GT, GTE, LT, LTE;
 precedence left PLUS, MOINS;
 precedence left MUL, DIV, MOD;
 precedence left MOINS_UNAIRE;
@@ -80,6 +80,8 @@ expr ::= NOT:op expr:e {:RESULT = new BinaryNode("!",  (BinaryNode)e); :}
        | expr:e1 EGAL expr:e2 {:RESULT = new BinaryNode("==", (BinaryNode) e1, (BinaryNode) e2); :}
        | expr:e1 GT expr:e2 {:RESULT = new BinaryNode(">", (BinaryNode) e1,(BinaryNode)  e2); :}
        | expr:e1 GTE expr:e2 {:RESULT = new BinaryNode(">=", (BinaryNode) e1,(BinaryNode)  e2); :}
+       | expr:e1 LT expr:e2 {:RESULT = new BinaryNode("<", (BinaryNode) e1,(BinaryNode)  e2); :}
+       | expr:e1 LTE expr:e2 {:RESULT = new BinaryNode("<=", (BinaryNode) e1,(BinaryNode)  e2); :}
        | expr:e1 PLUS expr:e2 {:RESULT = new BinaryNode("+", (BinaryNode) e1, (BinaryNode) e2); :}
        | expr:e1 MOINS expr:e2 {:RESULT = new BinaryNode("-",(BinaryNode)  e1, (BinaryNode) e2); :}
        | expr:e1 MUL expr:e2 {:RESULT = new BinaryNode("*", (BinaryNode) e1, (BinaryNode) e2); :}

@@ -44,16 +44,18 @@ public class BinaryNode {
         // Noeud sans fils
         if(this.terminalType != TerminalType.NONE ) {
             switch (this.terminalType) {
-                case ENTIER -> Main.ASM.code.add("mov eax, " + nodeValue);
+                case ENTIER -> Main.ASM.put("mov eax, " + nodeValue);
                 case VARIABLE -> {
-                    Main.ASM.code.add("mov "+nodeValue+", eax");
-                    Main.ASM.data.add(nodeValue + " DD");
+                    Main.ASM.put("mov "+nodeValue+", eax");
+                    Main.ASM.addVariable(nodeValue);
                 }
-                case NIL -> Main.ASM.code.add("nil");
-                case INPUT -> Main.ASM.code.add("");
+                case NIL -> Main.ASM.put("nil");
+                case INPUT -> {
+                    Main.ASM.put("in eax");
+                }
                 case IDENT -> {
-                    Main.ASM.code.add("mov eax, "+ this.nodeValue);
-                    Main.ASM.code.add("push eax");
+                    Main.ASM.put("mov eax, "+ this.nodeValue);
+                    Main.ASM.put("push eax");
                 }
             }
         }
@@ -63,8 +65,11 @@ public class BinaryNode {
             //System.out.println("NODE : " + nodeValue);
             if(this.rightChild == null) {
                 switch (nodeValue) {
-                    case "-" -> Main.ASM.code.add("-"+this.leftChild);
-                    case "OUTPUT" -> Main.ASM.code.add("OUTPUT");
+                    case "-" -> Main.ASM.put("-"+this.leftChild);
+                    case "OUTPUT" -> {
+                        Main.ASM.put("mov eax, a");
+                        Main.ASM.put("out eax");
+                    }
                     case "()" -> this.leftChild.toAsm();
                 }
             }
@@ -72,56 +77,21 @@ public class BinaryNode {
             else {
                 switch (nodeValue) {
                     case "+"-> {
-                        this.leftChild.toAsm();
-                        if(this.leftChild.terminalType != TerminalType.IDENT){
-                            Main.ASM.code.add("push eax");
-                        }
-                        this.rightChild.toAsm();
-                        if(this.rightChild.terminalType == TerminalType.IDENT){
-                            Main.ASM.code.add("pop eax");
-                        }
-                        Main.ASM.code.add("pop ebx");
-
-                        Main.ASM.code.add("add eax, ebx");
+                        handleChildren();
+                        Main.ASM.put("add eax, ebx");
                     }
                     case "-" -> {
-                        this.leftChild.toAsm();
-                        if(this.leftChild.terminalType != TerminalType.IDENT){
-                            Main.ASM.code.add("push eax");
-                        }
-                        this.rightChild.toAsm();
-                        if(this.rightChild.terminalType == TerminalType.IDENT){
-                            Main.ASM.code.add("pop eax");
-                        }
-                        Main.ASM.code.add("pop ebx");
-
-                        Main.ASM.code.add("sub eax, ebx");
+                        handleChildren();
+                        Main.ASM.put("sub eax, ebx");
                     }
                     case "*" -> {
-                        this.leftChild.toAsm();
-                        if(this.leftChild.terminalType != TerminalType.IDENT){
-                            Main.ASM.code.add("push eax");
-                        }
-                        this.rightChild.toAsm();
-                        if(this.rightChild.terminalType == TerminalType.IDENT){
-                            Main.ASM.code.add("pop eax");
-                        }
-                        Main.ASM.code.add("pop ebx");
-                        Main.ASM.code.add("mul eax, ebx");
+                        handleChildren();
+                        Main.ASM.put("mul eax, ebx");
                     }
                     case "/" -> {
-                        this.leftChild.toAsm();
-                        if(this.leftChild.terminalType != TerminalType.IDENT){
-                            Main.ASM.code.add("push eax");
-                        }
-                        this.rightChild.toAsm();
-                        if(this.rightChild.terminalType == TerminalType.IDENT){
-                            Main.ASM.code.add("pop eax");
-                        }
-                        Main.ASM.code.add("pop ebx");
-
-                        Main.ASM.code.add("div ebx, eax");
-                        Main.ASM.code.add("mov eax, ebx");
+                        handleChildren();
+                        Main.ASM.put("div ebx, eax");
+                        Main.ASM.put("mov eax, ebx");
                     }
                     case "LET" -> {
                         this.rightChild.toAsm();
@@ -132,12 +102,46 @@ public class BinaryNode {
                         this.rightChild.toAsm();
                     }
                     case "WHILE" -> {
-
+                        Main.ASM.state = "debut_while_1";
+                        this.leftChild.toAsm();
+                        Main.ASM.state = "debut_while_1";
+                        Main.ASM.put("mov eax,1");
+                        Main.ASM.put("jmp corps_while_1");
+                        Main.ASM.state = "corps_while_1";
+                        Main.ASM.put("jz sortie_while_1");
+                        this.rightChild.toAsm();
+                        Main.ASM.put("jmp debut_while_1");
+                        Main.ASM.state = "sortie_while_1";
                     }
                     case "IF" -> {
 
                     }
                     case "ELSE" -> {
+
+                    }
+                    case ">=" -> {
+                        handleChildren();
+                        Main.ASM.put("sub eax,ebx");
+                        Main.ASM.put("jge faux_gte_1");
+                        setFaux("faux_gte_1");
+                    }
+                    case ">" -> {
+                        handleChildren();
+                        Main.ASM.put("sub eax,ebx");
+                        Main.ASM.put("jg faux_gt_1");
+                        setFaux("faux_gt_1");
+                    }
+                    case "<=" -> {
+                        handleChildren();
+                        Main.ASM.put("sub eax,ebx");
+                        Main.ASM.put("jle faux_lte_1");
+                        setFaux("faux_lte_1");
+                    }
+                    case "<" -> {
+                        handleChildren();
+                        Main.ASM.put("sub eax,ebx");
+                        Main.ASM.put("jl faux_lt_1");
+                        setFaux("faux_lt_1");
 
                     }
                 }
@@ -147,5 +151,22 @@ public class BinaryNode {
 
     enum TerminalType {
         NONE, ENTIER, VARIABLE, NIL, INPUT, IDENT
+    }
+
+    private void handleChildren() {
+        this.leftChild.toAsm();
+        if(this.leftChild.terminalType != TerminalType.IDENT){
+            Main.ASM.put("push eax");
+        }
+        this.rightChild.toAsm();
+        if(this.rightChild.terminalType == TerminalType.IDENT){
+            Main.ASM.put("pop eax");
+        }
+        Main.ASM.put("pop ebx");
+    }
+
+    private void setFaux(String state) {
+        Main.ASM.state = state;
+        Main.ASM.put("mov eax,0");
     }
 }
