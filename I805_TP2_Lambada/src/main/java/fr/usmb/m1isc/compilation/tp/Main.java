@@ -4,21 +4,24 @@ import java_cup.runtime.Symbol;
 
 import java.io.FileReader;
 import java.io.InputStreamReader;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 
 public class Main {
 
     public static void main(String[] args) throws Exception  {
-	LexicalAnalyzer yy;
-	if (args.length > 0)
-	    yy = new LexicalAnalyzer(new FileReader(args[0])) ;
-	else
-	    yy = new LexicalAnalyzer(new InputStreamReader(System.in)) ;
-	@SuppressWarnings("deprecation")
-	parser p = new parser (yy);
-	Symbol s = p.parse();
-	BinaryNode arbre = (BinaryNode) s.value;
-	System.out.println(arbre.toString());
-	/*	DATA SEGMENT
+		LexicalAnalyzer yy;
+		if (args.length > 0)
+			yy = new LexicalAnalyzer(new FileReader(args[0])) ;
+		else
+			yy = new LexicalAnalyzer(new InputStreamReader(System.in)) ;
+		parser p = new parser (yy);
+		Symbol s = p.parse();
+		BinaryNode arbre = (BinaryNode) s.value;
+		System.out.println(arbre.toString());
+		arbre.toAsm();
+		ASM.print();
+    /*	DATA SEGMENT
 			prixHt DD
 			prixTtc DD
 		DATA ENDS
@@ -37,8 +40,23 @@ public class Main {
 			mov eax, ebx
 			mov prixTtc, eax
 	    CODE ENDS*/
+	}
 
-	arbre.toAsm();
+	public static class ASM {
+		public static ArrayList<String> code = new ArrayList<>();
+		public static ArrayList<String> data = new ArrayList<>();
+
+		public static void print() {
+			System.out.println("DATA SEGMENT");
+			for( String s : data) {
+				System.out.println("	" + s);
+			}
+			System.out.println("DATA ENDS\nCODE SEGMENT");
+			for( String s : code) {
+				System.out.println("	" + s);
+			}
+			System.out.println("CODE ENDS");
+		}
 	}
 
 }
