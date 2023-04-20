@@ -55,7 +55,6 @@ public class BinaryNode {
                 }
                 case IDENT -> {
                     Main.ASM.put("mov eax, "+ this.nodeValue);
-                    Main.ASM.put("push eax");
                 }
             }
         }
@@ -142,7 +141,16 @@ public class BinaryNode {
                         Main.ASM.put("sub eax,ebx");
                         Main.ASM.put("jl faux_lt_1");
                         setFaux("faux_lt_1");
-
+                    }
+                    case "mod" -> {
+                        this.rightChild.toAsm();
+                        Main.ASM.put("push eax");
+                        this.leftChild.toAsm();
+                        Main.ASM.put("pop ebx");
+                        Main.ASM.put("mov ecx,eax");
+                        Main.ASM.put("div ecx,ebx");
+                        Main.ASM.put("mul ecx,ebx");
+                        Main.ASM.put("sub eax,ecx");
                     }
                 }
             }
@@ -155,13 +163,8 @@ public class BinaryNode {
 
     private void handleChildren() {
         this.leftChild.toAsm();
-        if(this.leftChild.terminalType != TerminalType.IDENT){
-            Main.ASM.put("push eax");
-        }
+        Main.ASM.put("push eax");
         this.rightChild.toAsm();
-        if(this.rightChild.terminalType == TerminalType.IDENT){
-            Main.ASM.put("pop eax");
-        }
         Main.ASM.put("pop ebx");
     }
 
